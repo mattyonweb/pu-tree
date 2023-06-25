@@ -1,6 +1,11 @@
 export enum SearchOption {
     InMatch, OutMatch,
-    InMatchActive, OutMatchActive
+    InMatchActive, OutMatchActive,
+    CurrentSortingMode
+}
+
+export enum SortingMode {
+    ETA_ASC, ETA_DEC
 }
 
 export class SearchParams {
@@ -8,13 +13,15 @@ export class SearchParams {
     private outMatch: string;
     private inMatchActive: boolean;
     private outMatchActive: boolean;
+    private sortingMode: SortingMode;
 
     private inMatchSetter: CallableFunction;
     private outMatchSetter: CallableFunction;
     private inMatchActiveSetter: CallableFunction;
     private outMatchActiveSetter: CallableFunction;
+    private sortingModeSetter: CallableFunction;
 
-    constructor(inMatchTuple, outMatchTuple, isInMatchActiveTuple, isOutMatchActiveTuple) {
+    constructor(inMatchTuple, outMatchTuple, isInMatchActiveTuple, isOutMatchActiveTuple, sortingModeTuple) {
         this.inMatch = inMatchTuple[0];
         this.inMatchSetter = inMatchTuple[1];
 
@@ -26,6 +33,8 @@ export class SearchParams {
 
         this.outMatchActive = isOutMatchActiveTuple[0];
         this.outMatchActiveSetter = isOutMatchActiveTuple[1];
+
+        [this.sortingMode, this.sortingModeSetter] = sortingModeTuple;
     }
 
     setter(object: SearchOption, value: any) {
@@ -37,6 +46,8 @@ export class SearchParams {
             return this.inMatchActiveSetter(value);
         } else if (object === SearchOption.OutMatchActive) {
             return this.outMatchActiveSetter(value);
+        } else if (object === SearchOption.CurrentSortingMode) {
+            return this.sortingModeSetter(value);
         }
 
         throw object;
@@ -51,6 +62,8 @@ export class SearchParams {
             return this.inMatchActive;
         } else if (object === SearchOption.OutMatchActive) {
             return this.outMatchActive;
+        } else if (object === SearchOption.CurrentSortingMode) {
+            return this.sortingMode;
         }
 
         throw object;

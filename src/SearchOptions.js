@@ -1,15 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchParams = exports.SearchOption = void 0;
+exports.SearchParams = exports.SortingMode = exports.SearchOption = void 0;
 var SearchOption;
 (function (SearchOption) {
     SearchOption[SearchOption["InMatch"] = 0] = "InMatch";
     SearchOption[SearchOption["OutMatch"] = 1] = "OutMatch";
     SearchOption[SearchOption["InMatchActive"] = 2] = "InMatchActive";
     SearchOption[SearchOption["OutMatchActive"] = 3] = "OutMatchActive";
+    SearchOption[SearchOption["CurrentSortingMode"] = 4] = "CurrentSortingMode";
 })(SearchOption = exports.SearchOption || (exports.SearchOption = {}));
+var SortingMode;
+(function (SortingMode) {
+    SortingMode[SortingMode["ETA_ASC"] = 0] = "ETA_ASC";
+    SortingMode[SortingMode["ETA_DEC"] = 1] = "ETA_DEC";
+})(SortingMode = exports.SortingMode || (exports.SortingMode = {}));
 var SearchParams = /** @class */ (function () {
-    function SearchParams(inMatchTuple, outMatchTuple, isInMatchActiveTuple, isOutMatchActiveTuple) {
+    function SearchParams(inMatchTuple, outMatchTuple, isInMatchActiveTuple, isOutMatchActiveTuple, sortingModeTuple) {
         this.inMatch = inMatchTuple[0];
         this.inMatchSetter = inMatchTuple[1];
         this.outMatch = outMatchTuple[0];
@@ -18,6 +24,7 @@ var SearchParams = /** @class */ (function () {
         this.inMatchActiveSetter = isInMatchActiveTuple[1];
         this.outMatchActive = isOutMatchActiveTuple[0];
         this.outMatchActiveSetter = isOutMatchActiveTuple[1];
+        this.sortingMode = sortingModeTuple[0], this.sortingModeSetter = sortingModeTuple[1];
     }
     SearchParams.prototype.setter = function (object, value) {
         if (object === SearchOption.InMatch) {
@@ -31,6 +38,9 @@ var SearchParams = /** @class */ (function () {
         }
         else if (object === SearchOption.OutMatchActive) {
             return this.outMatchActiveSetter(value);
+        }
+        else if (object === SearchOption.CurrentSortingMode) {
+            return this.sortingModeSetter(value);
         }
         throw object;
     };
@@ -46,6 +56,9 @@ var SearchParams = /** @class */ (function () {
         }
         else if (object === SearchOption.OutMatchActive) {
             return this.outMatchActive;
+        }
+        else if (object === SearchOption.CurrentSortingMode) {
+            return this.sortingMode;
         }
         throw object;
     };

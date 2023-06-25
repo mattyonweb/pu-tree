@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 
 import {bubu} from "./recipes";
-import {SearchParams, SearchOption} from "./SearchOptions";
+import {SearchParams, SearchOption, SortingMode} from "./SearchOptions";
 import {msToTime} from "./misc";
 
 function App() {
@@ -11,8 +11,9 @@ function App() {
     const inMatchTuple = useState("");
     const outMatchActiveTuple = useState(false);
     const inMatchActiveTuple = useState(false);
+    const sortingModeTuple = useState(SortingMode.ETA_ASC);
 
-    const SP = new SearchParams(inMatchTuple, outMatchTuple, inMatchActiveTuple, outMatchActiveTuple);
+    const SP = new SearchParams(inMatchTuple, outMatchTuple, inMatchActiveTuple, outMatchActiveTuple, sortingModeTuple);
 
     return (
      <div className="App">
@@ -38,7 +39,30 @@ function Header() {
 
 // ========================================================================================
 
+const sortingOptions = [
+    {value: SortingMode.ETA_ASC,  label: "Time required (increasing order)"},
+    {value: SortingMode.ETA_DEC, label: "Time required (decreasing order)"}
+]
+
+function SortingOrder({SP}) {
+    let options = sortingOptions.map(so =>
+        <option value={so.value}>{so.label}</option>
+    );
+
+    return (
+        <select onChange={e => {
+            SP.setter(SearchOption.CurrentSortingMode, parseInt(e.target.value));
+        }}>
+            {options}
+        </select>
+    );
+}
+
+
+// ========================================================================================
+
 function SearchInput({SP}) {
+
     return (
         // eslint-disable-next-line react/style-prop-object
         <form className={"searchForm"}>
@@ -54,7 +78,7 @@ function SearchInput({SP}) {
             />
 
             <input type="checkbox"
-                onChange={(e) =>
+                onChange={(_) =>
                     SP.setter(
                         SearchOption.InMatchActive,
                         !SP.getter(SearchOption.InMatchActive))}
@@ -72,11 +96,15 @@ function SearchInput({SP}) {
                         SP.setter(SearchOption.OutMatch, e.target.value)}
                 />
                 <input type="checkbox"
-                       onChange={(e) =>
+                       onChange={(_) =>
                            SP.setter(
                                SearchOption.OutMatchActive,
                                !SP.getter(SearchOption.OutMatchActive))}
                 />
+            </div>
+
+            <div>
+                <SortingOrder SP={SP} />
             </div>
         </form>
     )
@@ -85,15 +113,27 @@ function SearchInput({SP}) {
 // ========================================================================================
 
 function PuRecipesList({SP}) {
-    /* Lists all the recipes matching the given filterText. */
-    let results = bubu.filter(recipe =>
-        SP.matchesOnOutput(recipe) &&
-            (!SP.getter(SearchOption.InMatchActive) || SP.matchesOnInput(recipe))
+    /* Lists all the recipes matching the given SearchParameters. */
+
+    let matchingRecipes = bubu.filter(recipe =>
+        SP.matchesOnInput(recipe) && SP.matchesOnOutput(recipe)
+    )
+
+    matchingRecipes.sort((x, y) => {
+            let sm = SP.getter(SearchOption.CurrentSortingMode);
+            if (sm === SortingMode.ETA_ASC) {
+                return x["TimeMs"] - y["TimeMs"];
+            } else if (sm === SortingMode.ETA_DEC) {
+                return y["TimeMs"] - x["TimeMs"];
+            }
+
+            throw sm;
+        }
     );
 
     return (
         <div className={"PuRecipesList"}>
-            { results.map(recipe =>
+            { matchingRecipes.map(recipe =>
                 <PuObjectSummary puRecipe={recipe}
                                  highlightText={SP.matchableWords()} />)
             }
@@ -125,11 +165,6 @@ function PuObjectSummary({puRecipe, highlightText}) {
           <div className="PuObjectOtherInfos">
               <p>{msToTime(puRecipe["TimeMs"])}</p>
           </div>
-
-          {/*<img*/}
-          {/*    src="https://thomaspynchon.com/wp-content/uploads/2014/08/Pynchon-simpsons2.jpg"*/}
-          {/*    alt="Katherine Johnson"*/}
-          {/*/>*/}
       </div>
   )
 }
@@ -139,7 +174,7 @@ function PuObjectSummary({puRecipe, highlightText}) {
 function BOMList({boms, highlightText}) {
     /* Show a list of <material + amount> */
     return (
-        <div class="bomEntries">
+        <div className="bomEntries">
             {boms.map(bom =>
                 highlightText.includes(bom["Ticker"]) ?
                 ( <p><b>{bom["Ticker"]}</b> - {bom["Amount"]}</p> ) :
