@@ -1,59 +1,54 @@
 import { useState } from 'react';
 import './App.css';
 
-import {bubu} from "./diohane";
-
-const fs= require('fs');
-
-let allreciped = bubu;
+import {bubu} from "./recipes";
 
 function App() {
+    // filterText is the "reference variable" to the text I'm searching
     const [filterText, setFilterText]  = useState('ENO');
-    const [resultsList, setResultList] = useState([]);
-
-    function performSearch() {
-        setResultList(
-            bubu.filter(recipe =>
-                            recipe["Outputs"].some(puOutput => puOutput["Ticker"] === filterText))
-                .map(recipe => <PuObjectSummary puRecipe={recipe} />)
-        );
-    }
 
     return (
      <div className="App">
-        <SearchInput
+         <SearchInput
             filterText={filterText}
             setFilterText={setFilterText}
-            performSearch={performSearch}
-        />
+         />
 
-         {resultsList}
-        {/*{resultsList.map(entry =>*/}
-        {/*    <PuObjectSummary puRecipe={entry} />)*/}
-        {/*}*/}
+         <PuRecipesList filterText={filterText} />
      </div>
     );
 }
 
 // ========================================================================================
 
-function SearchInput({filterText, setFilterText, performSearch}) {
+function SearchInput({filterText, setFilterText}) {
     return (
         <form>
             <input
                 type="text"
                 value={filterText}
                 placeholder="Search..."
-                onChange={(e) => {
-                    performSearch();
-                    setFilterText(e.target.value);
-                }
-            }
+                onChange={(e) => setFilterText(e.target.value)}
             />
         </form>
     )
 }
 
+// ========================================================================================
+
+function PuRecipesList({filterText}) {
+    /* Lists all the recipes matching the given filterText. */
+
+    let results = bubu.filter(recipe =>
+        recipe["Outputs"].some(puOutput => puOutput["Ticker"] === filterText)
+    );
+
+    return (
+        <div className={"PuRecipesList"}>
+            {results.map(recipe => <PuObjectSummary puRecipe={recipe} />)}
+        </div>
+    );
+}
 // ========================================================================================
 
 
@@ -87,7 +82,7 @@ function PuObjectSummary({puRecipe}) {
 // ==================================================================
 
 function BOMList({boms}) {
-    /* Show a list of material + amount */
+    /* Show a list of <material + amount> */
     return (
         <div class="bomEntries">
             {boms.map(bom =>
