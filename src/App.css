@@ -37,6 +37,14 @@
   }
 }
 
+.searchForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: end;
+  margin: auto;
+}
+
 .PuRecipesList {
   display: flex;
   flex-wrap: wrap;

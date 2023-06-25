@@ -2,73 +2,101 @@ import { useState } from 'react';
 import './App.css';
 
 import {bubu} from "./recipes";
+import {SearchParams, SearchOption} from "./SearchOptions";
+import {msToTime} from "./misc";
 
-function App({initialSearchText}) {
+function App() {
     // outMatch is what i'm searching among the outputs of a recipe
-    const [outMatch, setOutMatch] = useState("");
-    // inMatch is what i'm searching among the inputs of a recipe
-    const [inMatch, setInMatch]   = useState("");
+    const outMatchTuple = useState("");
+    const inMatchTuple = useState("");
+    const outMatchActiveTuple = useState(false);
+    const inMatchActiveTuple = useState(false);
+
+    const SP = new SearchParams(inMatchTuple, outMatchTuple, inMatchActiveTuple, outMatchActiveTuple);
 
     return (
      <div className="App">
-         <SearchInput
-             inMatch={inMatch}   setInMatch={setInMatch}
-             outMatch={outMatch} setOutMatch={setOutMatch}
-         />
-
-         <PuRecipesList inMatch={inMatch} outMatch={outMatch} />
+         <div className="header" style={{"display": "flex"}}>
+             <Header />
+             <SearchInput SP={SP} />
+         </div>
+         <PuRecipesList SP={SP} />
      </div>
     );
 }
 
 // ========================================================================================
 
-function SearchInput({inMatch, setInMatch, outMatch, setOutMatch}) {
+function Header() {
     return (
-        <form>
-            <label>Match on output material:</label>
+        <div style={{"width": "20vw", "background-color": "antiquewhite", "font-style": "italic"}}>
+            <h1>Tree vix</h1>
+        </div>
+    )
+}
+
+
+// ========================================================================================
+
+function SearchInput({SP}) {
+    return (
+        // eslint-disable-next-line react/style-prop-object
+        <form className={"searchForm"}>
+            <div>
+            <label style={{"padding": "1em"}}>Match on input:</label>
             <input
                 type="text"
-                value={outMatch}
+                value={SP.getter(SearchOption.InMatch)}
                 placeholder="Search..."
-                onChange={(e) => setOutMatch(e.target.value)}
+                disabled={!SP.getter(SearchOption.InMatchActive)}
+                onChange={(e) =>
+                    SP.setter(SearchOption.InMatch, e.target.value)}
             />
 
-            <label>Match on input:</label>
-            <input
-                type="text"
-                value={inMatch}
-                placeholder="Search..."
-                onChange={(e) => setInMatch(e.target.value)}
+            <input type="checkbox"
+                onChange={(e) =>
+                    SP.setter(
+                        SearchOption.InMatchActive,
+                        !SP.getter(SearchOption.InMatchActive))}
             />
+            </div>
 
-            <input type="checkbox" />
-
+            <div>
+                <label>Match on output material:</label>
+                <input
+                    type="text"
+                    value={SP.getter(SearchOption.OutMatch)}
+                    placeholder="Search..."
+                    disabled={!SP.getter(SearchOption.OutMatchActive)}
+                    onChange={(e) =>
+                        SP.setter(SearchOption.OutMatch, e.target.value)}
+                />
+                <input type="checkbox"
+                       onChange={(e) =>
+                           SP.setter(
+                               SearchOption.OutMatchActive,
+                               !SP.getter(SearchOption.OutMatchActive))}
+                />
+            </div>
         </form>
     )
 }
 
 // ========================================================================================
 
-function recipeContainsInOutput(recipe, text) {
-    return recipe["Outputs"].some(puOutput => puOutput["Ticker"] === text);
-}
-function recipeContainsInInput(recipe, text) {
-    return recipe["Inputs"].some(puInput => puInput["Ticker"] === text);
-}
-
-function PuRecipesList({inMatch, outMatch}) {
+function PuRecipesList({SP}) {
     /* Lists all the recipes matching the given filterText. */
     let results = bubu.filter(recipe =>
-        recipeContainsInOutput(recipe, outMatch) &&
-            (inMatch==="" || recipeContainsInInput(recipe, inMatch))
+        SP.matchesOnOutput(recipe) &&
+            (!SP.getter(SearchOption.InMatchActive) || SP.matchesOnInput(recipe))
     );
 
     return (
         <div className={"PuRecipesList"}>
-            {results.map(recipe =>
+            { results.map(recipe =>
                 <PuObjectSummary puRecipe={recipe}
-                                 highlightText={[inMatch, outMatch]} />)}
+                                 highlightText={SP.matchableWords()} />)
+            }
         </div>
     );
 }
@@ -94,10 +122,14 @@ function PuObjectSummary({puRecipe, highlightText}) {
               </div>
           </div>
 
-          <img
-              src="https://thomaspynchon.com/wp-content/uploads/2014/08/Pynchon-simpsons2.jpg"
-              alt="Katherine Johnson"
-          />
+          <div className="PuObjectOtherInfos">
+              <p>{msToTime(puRecipe["TimeMs"])}</p>
+          </div>
+
+          {/*<img*/}
+          {/*    src="https://thomaspynchon.com/wp-content/uploads/2014/08/Pynchon-simpsons2.jpg"*/}
+          {/*    alt="Katherine Johnson"*/}
+          {/*/>*/}
       </div>
   )
 }
