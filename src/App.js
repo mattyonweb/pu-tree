@@ -3,56 +3,79 @@ import './App.css';
 
 import {bubu} from "./recipes";
 
-function App() {
-    // filterText is the "reference variable" to the text I'm searching
-    const [filterText, setFilterText]  = useState('ENO');
+function App({initialSearchText}) {
+    // outMatch is what i'm searching among the outputs of a recipe
+    const [outMatch, setOutMatch] = useState("");
+    // inMatch is what i'm searching among the inputs of a recipe
+    const [inMatch, setInMatch]   = useState("");
 
     return (
      <div className="App">
          <SearchInput
-            filterText={filterText}
-            setFilterText={setFilterText}
+             inMatch={inMatch}   setInMatch={setInMatch}
+             outMatch={outMatch} setOutMatch={setOutMatch}
          />
 
-         <PuRecipesList filterText={filterText} />
+         <PuRecipesList inMatch={inMatch} outMatch={outMatch} />
      </div>
     );
 }
 
 // ========================================================================================
 
-function SearchInput({filterText, setFilterText}) {
+function SearchInput({inMatch, setInMatch, outMatch, setOutMatch}) {
     return (
         <form>
+            <label>Match on output material:</label>
             <input
                 type="text"
-                value={filterText}
+                value={outMatch}
                 placeholder="Search..."
-                onChange={(e) => setFilterText(e.target.value)}
+                onChange={(e) => setOutMatch(e.target.value)}
             />
+
+            <label>Match on input:</label>
+            <input
+                type="text"
+                value={inMatch}
+                placeholder="Search..."
+                onChange={(e) => setInMatch(e.target.value)}
+            />
+
+            <input type="checkbox" />
+
         </form>
     )
 }
 
 // ========================================================================================
 
-function PuRecipesList({filterText}) {
-    /* Lists all the recipes matching the given filterText. */
+function recipeContainsInOutput(recipe, text) {
+    return recipe["Outputs"].some(puOutput => puOutput["Ticker"] === text);
+}
+function recipeContainsInInput(recipe, text) {
+    return recipe["Inputs"].some(puInput => puInput["Ticker"] === text);
+}
 
+function PuRecipesList({inMatch, outMatch}) {
+    /* Lists all the recipes matching the given filterText. */
     let results = bubu.filter(recipe =>
-        recipe["Outputs"].some(puOutput => puOutput["Ticker"] === filterText)
+        recipeContainsInOutput(recipe, outMatch) &&
+            (inMatch==="" || recipeContainsInInput(recipe, inMatch))
     );
 
     return (
         <div className={"PuRecipesList"}>
-            {results.map(recipe => <PuObjectSummary puRecipe={recipe} />)}
+            {results.map(recipe =>
+                <PuObjectSummary puRecipe={recipe}
+                                 highlightText={[inMatch, outMatch]} />)}
         </div>
     );
 }
 // ========================================================================================
 
 
-function PuObjectSummary({puRecipe}) {
+function PuObjectSummary({puRecipe, highlightText}) {
     /* A table showing the input and output material for a given recipe. */
 
     return (
@@ -62,12 +85,12 @@ function PuObjectSummary({puRecipe}) {
           <div className="inputOutputFlex">
               <div className="bomListContainer">
               <h3>Inputs</h3>
-              <BOMList boms={puRecipe["Inputs"]} />
+              <BOMList boms={puRecipe["Inputs"]} highlightText={highlightText} />
               </div>
 
               <div className="bomListContainer">
               <h3>Outputs</h3>
-              <BOMList boms={puRecipe["Outputs"]} />
+              <BOMList boms={puRecipe["Outputs"]} highlightText={highlightText} />
               </div>
           </div>
 
@@ -81,12 +104,14 @@ function PuObjectSummary({puRecipe}) {
 
 // ==================================================================
 
-function BOMList({boms}) {
+function BOMList({boms, highlightText}) {
     /* Show a list of <material + amount> */
     return (
         <div class="bomEntries">
             {boms.map(bom =>
-              <p>{bom["Ticker"]} - {bom["Amount"]}</p>
+                highlightText.includes(bom["Ticker"]) ?
+                ( <p><b>{bom["Ticker"]}</b> - {bom["Amount"]}</p> ) :
+                ( <p>{bom["Ticker"]} - {bom["Amount"]}</p> )
             )}
         </div>
     )
