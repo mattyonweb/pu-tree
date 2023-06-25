@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css';
 
 import {bubu} from "./recipes";
+import {materials} from "./allmaterials";
 import {SearchParams, SearchOption, SortingMode} from "./SearchOptions";
 import {msToTime} from "./misc";
 
@@ -30,8 +31,9 @@ function App() {
 
 function Header() {
     return (
-        <div style={{"width": "20vw", "background-color": "antiquewhite", "font-style": "italic"}}>
-            <h1>Tree vix</h1>
+        <div style={{"width": "20vw", "background-color": "antiquewhite", "font-style": "italic", "line-height": "0.8em"}}>
+            <h1>Prosperous World</h1>
+            <h5>Materials tree</h5>
         </div>
     )
 }
@@ -74,7 +76,7 @@ function SearchInput({SP}) {
                 placeholder="Search..."
                 disabled={!SP.getter(SearchOption.InMatchActive)}
                 onChange={(e) =>
-                    SP.setter(SearchOption.InMatch, e.target.value)}
+                    SP.setter(SearchOption.InMatch, e.target.value.toUpperCase())}
             />
 
             <input type="checkbox"
@@ -93,7 +95,7 @@ function SearchInput({SP}) {
                     placeholder="Search..."
                     disabled={!SP.getter(SearchOption.OutMatchActive)}
                     onChange={(e) =>
-                        SP.setter(SearchOption.OutMatch, e.target.value)}
+                        SP.setter(SearchOption.OutMatch, e.target.value.toUpperCase())}
                 />
                 <input type="checkbox"
                        onChange={(_) =>
@@ -177,11 +179,25 @@ function BOMList({boms, highlightText}) {
         <div className="bomEntries">
             {boms.map(bom =>
                 highlightText.includes(bom["Ticker"]) ?
-                ( <p><b>{bom["Ticker"]}</b> - {bom["Amount"]}</p> ) :
-                ( <p>{bom["Ticker"]} - {bom["Amount"]}</p> )
+                <p>
+                    <b style={{backgroundColor: "antiquewhite"}}><RichTiker ticker={bom["Ticker"]} /></b> - {bom["Amount"]}
+                </p>
+                    :
+                <p>
+                    <RichTiker ticker={bom["Ticker"]} /> - {bom["Amount"]}
+                </p>
             )}
         </div>
     )
+}
+
+function RichTiker({ticker}) {
+    return (
+        <span className="Ticker"
+              title={materials[ticker]["Name"]}>
+            {ticker}
+        </span>
+    );
 }
 
 export default App;

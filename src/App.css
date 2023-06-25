@@ -55,6 +55,7 @@
   width: 22vw;
   margin: 1vw 1vw;
   border-style: solid;
+  box-shadow: 2px 2px;
 }
 
 .inputOutputFlex {
@@ -67,3 +68,6 @@
   line-height: 0.2em;
 }
 
+.Ticker {
+  text-decoration: underline;
+}
