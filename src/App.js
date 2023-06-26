@@ -5,16 +5,29 @@ import {bubu} from "./recipes";
 import {materials} from "./allmaterials";
 import {SearchParams, SearchOption, SortingMode} from "./SearchOptions";
 import {msToTime} from "./misc";
+// import {useHotkeys} from "react-hotkeys-hook";
 
 function App() {
     // outMatch is what i'm searching among the outputs of a recipe
     const outMatchTuple = useState("");
     const inMatchTuple = useState("");
-    const outMatchActiveTuple = useState(false);
+    const outMatchActiveTuple = useState(true);
     const inMatchActiveTuple = useState(false);
     const sortingModeTuple = useState(SortingMode.ETA_ASC);
 
     const SP = new SearchParams(inMatchTuple, outMatchTuple, inMatchActiveTuple, outMatchActiveTuple, sortingModeTuple);
+
+    // useHotkeys(
+    //     'ctrl+y',
+    //     event => {
+    //         event.preventDefault();
+    //         inMatchTuple[1]("ALO");
+    //     },
+    //     {
+    //         // enabled: () => false,
+    //         preventDefault: true,
+    //     }
+    // );
 
     return (
      <div className="App">
@@ -80,10 +93,11 @@ function SearchInput({SP}) {
             />
 
             <input type="checkbox"
-                onChange={(_) =>
-                    SP.setter(
+                   onChange={(_) =>
+                      SP.setter(
                         SearchOption.InMatchActive,
                         !SP.getter(SearchOption.InMatchActive))}
+                   checked={SP.getter(SearchOption.InMatchActive)}
             />
             </div>
 
@@ -92,6 +106,7 @@ function SearchInput({SP}) {
                 <input
                     type="text"
                     value={SP.getter(SearchOption.OutMatch)}
+                    autoFocus={true}
                     placeholder="Search..."
                     disabled={!SP.getter(SearchOption.OutMatchActive)}
                     onChange={(e) =>
@@ -102,6 +117,7 @@ function SearchInput({SP}) {
                            SP.setter(
                                SearchOption.OutMatchActive,
                                !SP.getter(SearchOption.OutMatchActive))}
+                       checked={SP.getter(SearchOption.OutMatchActive)}
                 />
             </div>
 
