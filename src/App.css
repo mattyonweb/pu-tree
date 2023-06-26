@@ -37,6 +37,34 @@
   }
 }
 
+/* ============================================== */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media only screen and (min-width: 720px) {
+  .header {
+    flex-direction: row;
+    align-items: initial;
+  }
+}
+
+.WebpageTitle {
+  width: 90vw;
+  background-color: antiquewhite;
+  font-style: italic;
+  line-height: 0.8em;
+}
+
+@media only screen and (min-width: 720px) {
+  .WebpageTitle {
+    width: 45vw;
+  }
+}
+
 .searchForm {
   display: flex;
   flex-direction: column;
@@ -44,6 +72,7 @@
   align-items: end;
   margin: auto;
 }
+/* ============================================== */
 
 .PuRecipesList {
   display: flex;
@@ -52,11 +81,40 @@
 }
 
 .PuObjectSummary {
-  width: 22vw;
-  margin: 1vw 1vw;
+  width: 80vw;
+  margin: 3vw 1vw;
   border-style: solid;
   box-shadow: 2px 2px;
+  background: #91b7fb;
 }
+
+@media only screen and (min-width: 450px) {
+  .PuObjectSummary {
+    width: 45vw;
+    margin: 1vw 1vw;
+  }
+}
+
+@media only screen and (min-width: 700px) {
+  .PuObjectSummary {
+    width: 30vw;
+    margin: 1vw 1vw;
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  .PuObjectSummary {
+    width: 22vw;
+    margin: 1vw 1vw;
+  }
+}
+
+/*.PuObjectSummary {*/
+/*  width: 22vw;*/
+/*  margin: 1vw 1vw;*/
+/*  border-style: solid;*/
+/*  box-shadow: 2px 2px;*/
+/*}*/
 
 .inputOutputFlex {
   display: flex;

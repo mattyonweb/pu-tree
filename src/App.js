@@ -44,7 +44,7 @@ function App() {
 
 function Header() {
     return (
-        <div style={{"width": "20vw", "background-color": "antiquewhite", "font-style": "italic", "line-height": "0.8em"}}>
+        <div className={"WebpageTitle"} >
             <h1>Prosperous World</h1>
             <h5>Materials tree</h5>
         </div>
@@ -88,6 +88,8 @@ function SearchInput({SP}) {
                 value={SP.getter(SearchOption.InMatch)}
                 placeholder="Search..."
                 disabled={!SP.getter(SearchOption.InMatchActive)}
+                maxLength={19}
+                size={11}
                 onChange={(e) =>
                     SP.setter(SearchOption.InMatch, e.target.value.toUpperCase())}
             />
@@ -102,12 +104,14 @@ function SearchInput({SP}) {
             </div>
 
             <div>
-                <label>Match on output material:</label>
+                <label style={{"padding": "1em"}}>Match on output:</label>
                 <input
                     type="text"
                     value={SP.getter(SearchOption.OutMatch)}
                     autoFocus={true}
                     placeholder="Search..."
+                    maxLength={19}
+                    size={11}
                     disabled={!SP.getter(SearchOption.OutMatchActive)}
                     onChange={(e) =>
                         SP.setter(SearchOption.OutMatch, e.target.value.toUpperCase())}
