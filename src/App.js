@@ -5,6 +5,8 @@ import {bubu} from "./recipes";
 import {materials} from "./allmaterials";
 import {SearchParams, SearchOption, SortingMode} from "./SearchOptions";
 import {msToTime} from "./misc";
+import exchangeAll from './exchange-all.json';
+
 // import {useHotkeys} from "react-hotkeys-hook";
 
 function App() {
@@ -77,7 +79,6 @@ function SortingOrder({SP}) {
 // ========================================================================================
 
 function SearchInput({SP}) {
-
     return (
         // eslint-disable-next-line react/style-prop-object
         <form className={"searchForm"}>
@@ -170,7 +171,11 @@ function PuObjectSummary({puRecipe, highlightText}) {
 
     return (
       <div className="PuObjectSummary">
-          <h2>{puRecipe["RecipeName"]}</h2>
+          <h2 style={{"margin-bottom": "2px"}}>{puRecipe["RecipeName"]}</h2>
+
+          {/*<div className="PuObjectOtherInfos">*/}
+          <p style={{"margin-top": "2px"}}>{puRecipe["BuildingTicker"]}</p>
+          {/*</div>*/}
 
           <div className="inputOutputFlex">
               <div className="bomListContainer">
@@ -193,8 +198,15 @@ function PuObjectSummary({puRecipe, highlightText}) {
 
 // ==================================================================
 
+function singleBomTotalCost(bom) {
+    return Math.round(bom["Amount"] * exchangeAll[bom["Ticker"]]["PriceAverage"]);
+}
+
 function BOMList({boms, highlightText}) {
     /* Show a list of <material + amount> */
+    let total = boms.reduce((accumulator, bom) =>
+        accumulator + singleBomTotalCost(bom), 0);
+
     return (
         <div className="bomEntries">
             {boms.map(bom =>
@@ -207,6 +219,8 @@ function BOMList({boms, highlightText}) {
                     <RichTiker ticker={bom["Ticker"]} /> - {bom["Amount"]}
                 </p>
             )}
+            <br />
+            <p>Total: {total}$</p>
         </div>
     )
 }
@@ -216,6 +230,7 @@ function RichTiker({ticker}) {
         <span className="Ticker"
               title={materials[ticker]["Name"]}>
             {ticker}
+            ({exchangeAll[ticker]["PriceAverage"]} $)
         </span>
     );
 }
