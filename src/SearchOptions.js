@@ -13,6 +13,8 @@ var SortingMode;
 (function (SortingMode) {
     SortingMode[SortingMode["ETA_ASC"] = 0] = "ETA_ASC";
     SortingMode[SortingMode["ETA_DEC"] = 1] = "ETA_DEC";
+    SortingMode[SortingMode["PROFIT_ASC"] = 2] = "PROFIT_ASC";
+    SortingMode[SortingMode["PROFIT_DEC"] = 3] = "PROFIT_DEC";
 })(SortingMode = exports.SortingMode || (exports.SortingMode = {}));
 var SearchParams = /** @class */ (function () {
     function SearchParams(inMatchTuple, outMatchTuple, isInMatchActiveTuple, isOutMatchActiveTuple, sortingModeTuple) {
@@ -75,9 +77,6 @@ var SearchParams = /** @class */ (function () {
         if (!this.outMatchActive) {
             return true;
         }
-        // TODO: ricalcolare lo split ogni volta è costoso, potresti farlo una volta
-        //  sola nel momento in cui aggiorni l'inputMatch, ma questo ti costringe a
-        //  cambiare un po' di cose
         var recipeOutputs = recipe["Outputs"].map(function (i) { return i["Ticker"]; });
         for (var _i = 0, _a = this.outMatchWords; _i < _a.length; _i++) {
             var element = _a[_i];
@@ -86,15 +85,11 @@ var SearchParams = /** @class */ (function () {
             }
         }
         return true;
-        // return recipe["Outputs"].some(puOutput => puOutput["Ticker"] === this.outMatch);
     };
     SearchParams.prototype.matchesOnInput = function (recipe) {
         if (!this.inMatchActive) {
             return true;
         }
-        // TODO: ricalcolare lo split ogni volta è costoso, potresti farlo una volta
-        //  sola nel momento in cui aggiorni l'inputMatch, ma questo ti costringe a
-        //  cambiare un po' di cose
         var recipeInputs = recipe["Inputs"].map(function (i) { return i["Ticker"]; });
         for (var _i = 0, _a = this.inMatchWords; _i < _a.length; _i++) {
             var element = _a[_i];

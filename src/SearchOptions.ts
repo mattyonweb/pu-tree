@@ -5,7 +5,8 @@ export enum SearchOption {
 }
 
 export enum SortingMode {
-    ETA_ASC, ETA_DEC
+    ETA_ASC, ETA_DEC,
+    PROFIT_ASC, PROFIT_DEC
 }
 
 

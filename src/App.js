@@ -4,10 +4,8 @@ import './App.css';
 import {bubu} from "./recipes";
 import {materials} from "./allmaterials";
 import {SearchParams, SearchOption, SortingMode} from "./SearchOptions";
-import {msToTime} from "./misc";
+import {signedNum, msToTime} from "./Utils";
 import exchangeAll from './exchange-all.json';
-
-// import {useHotkeys} from "react-hotkeys-hook";
 
 function App() {
     // outMatch is what i'm searching among the outputs of a recipe
@@ -18,18 +16,6 @@ function App() {
     const sortingModeTuple = useState(SortingMode.ETA_ASC);
 
     const SP = new SearchParams(inMatchTuple, outMatchTuple, inMatchActiveTuple, outMatchActiveTuple, sortingModeTuple);
-
-    // useHotkeys(
-    //     'ctrl+y',
-    //     event => {
-    //         event.preventDefault();
-    //         inMatchTuple[1]("ALO");
-    //     },
-    //     {
-    //         // enabled: () => false,
-    //         preventDefault: true,
-    //     }
-    // );
 
     return (
      <div className="App">
@@ -58,7 +44,9 @@ function Header() {
 
 const sortingOptions = [
     {value: SortingMode.ETA_ASC,  label: "Time required (increasing order)"},
-    {value: SortingMode.ETA_DEC, label: "Time required (decreasing order)"}
+    {value: SortingMode.ETA_DEC, label: "Time required (decreasing order)"},
+    {value: SortingMode.PROFIT_ASC, label: "Profit (increasing order)"},
+    {value: SortingMode.PROFIT_DEC, label: "Profit (decreasing order)"}
 ]
 
 function SortingOrder({SP}) {
@@ -148,6 +136,10 @@ function PuRecipesList({SP}) {
                 return x["TimeMs"] - y["TimeMs"];
             } else if (sm === SortingMode.ETA_DEC) {
                 return y["TimeMs"] - x["TimeMs"];
+            } else if (sm === SortingMode.PROFIT_ASC) {
+                return recipeProfit(x) - recipeProfit(y);
+            } else if (sm === SortingMode.PROFIT_DEC) {
+                return recipeProfit(y) - recipeProfit(x);
             }
 
             throw sm;
@@ -173,24 +165,23 @@ function PuObjectSummary({puRecipe, highlightText}) {
       <div className="PuObjectSummary">
           <h2 style={{"margin-bottom": "2px"}}>{puRecipe["RecipeName"]}</h2>
 
-          {/*<div className="PuObjectOtherInfos">*/}
           <p style={{"margin-top": "2px"}}>{puRecipe["BuildingTicker"]}</p>
-          {/*</div>*/}
 
           <div className="inputOutputFlex">
               <div className="bomListContainer">
-              <h3>Inputs</h3>
+              <h3 style={{"margin-bottom": "1px"}}>Inputs</h3>
               <BOMList boms={puRecipe["Inputs"]} highlightText={highlightText} />
               </div>
 
               <div className="bomListContainer">
-              <h3>Outputs</h3>
+              <h3 style={{"margin-bottom": "1px"}}>Outputs</h3>
               <BOMList boms={puRecipe["Outputs"]} highlightText={highlightText} />
               </div>
           </div>
 
           <div className="PuObjectOtherInfos">
               <p>{msToTime(puRecipe["TimeMs"])}</p>
+              <p>{signedNum(recipeProfit(puRecipe))}$</p>
           </div>
       </div>
   )
@@ -200,6 +191,14 @@ function PuObjectSummary({puRecipe, highlightText}) {
 
 function singleBomTotalCost(bom) {
     return Math.round(bom["Amount"] * exchangeAll[bom["Ticker"]]["PriceAverage"]);
+}
+function recipeProfit(recipe) {
+    let costs = recipe["Inputs"].reduce((accumulator, bom) =>
+        accumulator + singleBomTotalCost(bom), 0);
+    let gains = recipe["Outputs"].reduce((accumulator, bom) =>
+        accumulator + singleBomTotalCost(bom), 0);
+
+    return gains - costs;
 }
 
 function BOMList({boms, highlightText}) {
@@ -211,13 +210,13 @@ function BOMList({boms, highlightText}) {
         <div className="bomEntries">
             {boms.map(bom =>
                 highlightText.includes(bom["Ticker"]) ?
-                <p>
+                <div className="bomEntry">
                     <b style={{backgroundColor: "antiquewhite"}}><RichTiker ticker={bom["Ticker"]} /></b> - {bom["Amount"]}
-                </p>
+                </div>
                     :
-                <p>
+                <div className="bomEntry">
                     <RichTiker ticker={bom["Ticker"]} /> - {bom["Amount"]}
-                </p>
+                </div>
             )}
             <br />
             <p>Total: {total}$</p>
